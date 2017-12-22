@@ -50,6 +50,7 @@ class Goblin(GameObject):
         self.desc = 'A foul creature'
         self.health = 3
         self.is_looted = False
+        self.is_dead = False
         super().__init__(name)
 
     @property
@@ -75,6 +76,7 @@ class Minotaur(GameObject):
         self.desc = 'Some kind of half-bull half-man creature'
         self.health = 2
         self.is_looted = False
+        self.is_dead = False
         super().__init__(name)
 
     @property
@@ -154,19 +156,27 @@ def get_input():
         return
 
     if verb_word == 'loot':
-        noun_word = command[1]
-        thing = GameObject.objects[noun_word]
-        print(command[1])
-        if thing.is_looted is False:
-            print(verb(noun_word))
-            thing.is_looted = True
+        if len(command) == 1:
+            print('That verb requires a second argument')
         else:
-            print('You have already looted that monster')
+            noun_word = command[1]
+            thing = GameObject.objects[noun_word]
+            print(command[1])
+            if thing.is_looted is False and thing.is_dead is True:
+                print(verb(noun_word))
+                thing.is_looted = True
+            elif thing.is_dead is False:
+                print('The {} is not dead.'.format(noun_word))
+            else:
+                print('You have already looted that monster')
     elif len(command) >= 2:
         noun_word = command[1]
         print(verb(noun_word))
     elif len(command) == 1:
-        print(verb())
+        if verb_word in verb_arg_list:
+            print('That verb requires a second argument.')
+        else:
+            print(verb())
     else:
         print(verb('nothing'))
 
@@ -188,16 +198,20 @@ def hit(noun):
             thing.health -= 1
             if thing.health <= 0:
                 msg = 'You killed the {}'.format(thing.class_name)
+                thing.is_dead = True
             else:
                 msg = 'You hit the {}'.format(thing.class_name)
                 msg = msg + '\n' + attack_back(noun)
+                thing.is_dead = False
         elif type(thing) == Minotaur:
             thing.health -= 1
             if thing.health <= 0:
                 msg = 'You killed the {}'.format(thing.class_name)
+                thing.is_dead = True
             else:
                 msg = 'You hit the {}'.format(thing.class_name)
                 msg = msg + '\n' + attack_back(noun)
+                thing.is_dead = False
         elif type(thing) == Character:
             msg = 'You cannot hit yourself'
     else:
@@ -276,6 +290,7 @@ room = StartingRoom()
 
 monster_list = ['minotaur', 'goblin']
 direction_list = ['east', 'west', 'north', 'south']
+verb_arg_list = ['say', 'examine', 'hit', 'move', 'loot']
 verb_dict = {'say': say, 'examine': examine, 'hit': hit, 'rest': rest,
              'move': move, 'loot': loot}
 
