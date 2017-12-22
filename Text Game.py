@@ -33,6 +33,7 @@ class StartingRoom(GameRoom):
 class GameObject:
     class_name = ''
     desc = ''
+    is_looted = bool
     objects = {}
 
     def __init__(self, name):
@@ -48,6 +49,7 @@ class Goblin(GameObject):
         self.class_name = 'goblin'
         self.desc = 'A foul creature'
         self.health = 3
+        self.is_looted = False
         super().__init__(name)
 
     @property
@@ -72,6 +74,7 @@ class Minotaur(GameObject):
         self.class_name = 'minotaur'
         self.desc = 'Some kind of half-bull half-man creature'
         self.health = 2
+        self.is_looted = False
         super().__init__(name)
 
     @property
@@ -150,7 +153,16 @@ def get_input():
         print('Unknown verb {}'.format(verb_word))
         return
 
-    if len(command) >= 2:
+    if verb_word == 'loot':
+        noun_word = command[1]
+        thing = GameObject.objects[noun_word]
+        print(command[1])
+        if thing.is_looted is False:
+            print(verb(noun_word))
+            thing.is_looted = True
+        else:
+            print('You have already looted that monster')
+    elif len(command) >= 2:
         noun_word = command[1]
         print(verb(noun_word))
     elif len(command) == 1:
@@ -235,6 +247,19 @@ def move(direction):
     return msg
 
 
+def loot(noun):
+    if noun in GameObject.objects:
+        thing = GameObject.objects[noun]
+        if type(thing) == Goblin:
+            gold = rand.randint(7, 15)
+            return 'You found {} gold pieces.'.format(gold)
+        elif type(thing) == Minotaur:
+            gold = rand.randint(10, 20)
+            return 'You found {} gold pieces.'.format(gold)
+    else:
+        return 'There is no {} to loot.'.format(noun)
+
+
 def get_monster():
     randint = rand.randint(1, 2)
     if randint == 1:
@@ -246,12 +271,12 @@ def get_monster():
     return msg
 
 
-character = Character('Geoffrey', 4)
+character = Character('Geoffrey', 6)
 room = StartingRoom()
 
 monster_list = ['minotaur', 'goblin']
 direction_list = ['east', 'west', 'north', 'south']
 verb_dict = {'say': say, 'examine': examine, 'hit': hit, 'rest': rest,
-             'move': move}
+             'move': move, 'loot': loot}
 
 main()
