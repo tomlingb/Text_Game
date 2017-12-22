@@ -287,7 +287,6 @@ def get_monster():
 
 character = Character('Geoffrey', 6)
 room = StartingRoom()
-
 monster_list = ['minotaur', 'goblin']
 direction_list = ['east', 'west', 'north', 'south']
 verb_arg_list = ['say', 'examine', 'hit', 'move', 'loot']
