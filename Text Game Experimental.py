@@ -41,14 +41,20 @@ class StartingRoom(GameRoom):
 
 
 class Hallway1(GameRoom):
-    def __init__(self):
+    def __init__(self, directions):
         self.room_type = 'hallway'
         self.desc = 'A long narrow corridor, too dark to see the end.'
+        self.campfire = False
+        self.directions = directions
         super().__init__()
 
     @property
     def desc(self):
-        return self._desc
+        if self.campfire is True:
+            campfire = 'There is a campfire in the room.'
+        else:
+            campfire = 'There is not a campfire in the room.'
+        return self._desc + '\n' + campfire
 
     @desc.setter
     def desc(self, value):
@@ -58,7 +64,7 @@ class Hallway1(GameRoom):
 class GameMovement:
     direction = ''
     is_available = bool
-    room_list = ['startingroom', Hallway1]
+    room_list = ['startingroom', 'hallway1']
 
     def __init__(self):
         print('works')
@@ -85,6 +91,8 @@ class Move(GameMovement):
         room1 = self.room_list[Character.room]
         if room1 == 'startingroom':
             room1 = startingroom
+        elif room1 == 'hallway1':
+            room1 = hallway1
         directions = room1.directions
         if direction in directions:
             print('returning true')
@@ -98,30 +106,13 @@ class Move(GameMovement):
             print('something else is wrong')
 
 
-class South(GameMovement):
-    def __init__(self):
-        self.direction = 'south'
-        super().__init__()
-
-    @property
-    def desc(self):
-        return self._desc
-
-    @desc.setter
-    def desc(self, value):
-        self._desc = value
-
-    def check_availability(self):
-        return self.is_available
-
-
 class GameObject:
     class_name = ''
     desc = ''
     is_looted = bool
     objects = {}
     room = 0
-    room_list = [StartingRoom, Hallway1]
+    room_list = ['startingroom', 'hallway1']
 
     def __init__(self, name):
         self.name = name
@@ -333,10 +324,17 @@ def attack_back(noun):
 
 
 def examine(noun):
-    if noun in GameObject.objects:
+    if noun == 'room':
+        print(noun)
+        current_room = GameObject.room_list[Character.room]
+        if current_room == 'startingroom':
+            current_room = startingroom
+        elif current_room == 'hallway1':
+            current_room = hallway1
+        print(current_room)
+        return GameRoom.get_desc(current_room)
+    elif noun in GameObject.objects:
         return GameObject.objects[noun].get_desc()
-    elif noun in GameRoom.rooms:
-        return GameRoom.rooms[noun].get_desc()
     else:
         print(GameObject.objects, '\n', GameRoom.rooms)
         return 'There is no {} here'.format(noun)
@@ -345,8 +343,8 @@ def examine(noun):
 def move(direction):
     available = Move.check_availability(moves, direction)
     if available is True:
-        msg = 'You have moved {}'.format(direction)
-        Character.room += 0  # Change this when more room directions available
+        msg = 'You have moved {} and entered a new room'.format(direction)
+        Character.room += 1
     elif available is False:
         msg = 'You cannot move in that direction.'
     else:
@@ -380,12 +378,14 @@ def get_monster():
     return msg
 
 
-startingroom_directions = ['south']
+startingroom_directions = ['north']
+hallway1_directions = ['north']
 character = Character('Geoffrey', 6, 0)
 startingroom = StartingRoom(startingroom_directions)
+hallway1 = Hallway1(hallway1_directions)
 moves = Move()
 
-room_list = ['room', 'hallway']
+room_list = ['startingroom', 'hallway1']
 monster_list = ['minotaur', 'goblin']
 direction_list = ['east', 'west', 'north', 'south']
 verb_arg_list = ['say', 'examine', 'hit', 'rest', 'move', 'loot']
