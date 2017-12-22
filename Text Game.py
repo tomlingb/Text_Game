@@ -6,9 +6,13 @@ class GameRoom:
     desc = ''
     rooms = {}
     monster = ''
+    campfire_rooms = {}
+    campfire = bool
 
     def __init__(self):
         self.monster = get_monster()
+        if self.campfire is True:
+            GameRoom.campfire_rooms[self.room_type] = self
         GameRoom.rooms[self.room_type] = self
 
     def get_desc(self):
@@ -19,15 +23,35 @@ class StartingRoom(GameRoom):
     def __init__(self):
         self.room_type = 'room'
         self.desc = """A small square room with a door on every wall"""
+        self.campfire = True
         super().__init__()
 
     @property
     def desc(self):
-        return self._desc
+        if self.campfire is True:
+            campfire = 'There is a campfire in the room.'
+        else:
+            campfire = 'There is not a campfire in the room.'
+        return self._desc + '\n' + campfire
 
     @desc.setter
     def desc(self, value):
         self._desc = value
+
+
+class Hallway1(GameRoom):
+    def __init__(self):
+        self.room_type = 'hallway'
+        self.desc = 'A narrow corridor with a door on the opposite end'
+        super().__init__()
+
+    @property
+    def desc(self):
+        return self.desc
+
+    @desc.setter
+    def desc(self, value):
+        self.desc = value
 
 
 class GameObject:
@@ -100,10 +124,12 @@ class Character(GameObject):
         self.desc = 'You'
         self.health = health
         self.full_health = health
+        self.money = 0
         super().__init__(name)
 
     @property
     def desc(self):
+        money = 'You have {} gold pieces.'.format(self.money)
         if self.health >= self.full_health:
             health_line = 'You are at full health.'
         elif self.health > self.full_health / 2 and self.health < self.full_health:
@@ -114,17 +140,20 @@ class Character(GameObject):
             health_line = 'You are below half health.'
         elif self.health <= 0:
             health_line = 'You are dead.'
-        return self._desc + '\n' + health_line
+        return self._desc + '\n' + health_line + '\n' + money
 
     @desc.setter
     def desc(self, value):
         self._desc = value
 
+    def money(self, amount):
+        self.money += amount
+
 
 def main():
     start()
     while True:
-        if get_input() == False:
+        if get_input() is False:
             break
         elif character.health <= 0:
             print('You have died.')
@@ -181,10 +210,13 @@ def get_input():
         print(verb('nothing'))
 
 
-def rest():
-    thing = GameObject.objects['character']
-    thing.health = thing.full_health
-    return 'You awake feeling renewed.'
+def rest(current_room):
+    if current_room in GameRoom.campfire_rooms:
+        you = GameObject.objects['character']
+        you.health = you.full_health
+        return 'You awake feeling renewed.'
+    else:
+        return 'There must be a campfire in the room for you to rest.'
 
 
 def say(noun):
@@ -266,9 +298,11 @@ def loot(noun):
         thing = GameObject.objects[noun]
         if type(thing) == Goblin:
             gold = rand.randint(7, 15)
+            Character.money(character, gold)
             return 'You found {} gold pieces.'.format(gold)
         elif type(thing) == Minotaur:
             gold = rand.randint(10, 20)
+            Character.money(character, gold)
             return 'You found {} gold pieces.'.format(gold)
     else:
         return 'There is no {} to loot.'.format(noun)
@@ -289,7 +323,7 @@ character = Character('Geoffrey', 6)
 room = StartingRoom()
 monster_list = ['minotaur', 'goblin']
 direction_list = ['east', 'west', 'north', 'south']
-verb_arg_list = ['say', 'examine', 'hit', 'move', 'loot']
+verb_arg_list = ['say', 'examine', 'hit', 'rest', 'move', 'loot']
 verb_dict = {'say': say, 'examine': examine, 'hit': hit, 'rest': rest,
              'move': move, 'loot': loot}
 
