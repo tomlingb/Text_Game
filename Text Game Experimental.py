@@ -58,7 +58,7 @@ class Hallway1(GameRoom):
 class GameMovement:
     direction = ''
     is_available = bool
-    room_list = [StartingRoom, Hallway1]
+    room_list = ['startingroom', Hallway1]
 
     def __init__(self):
         print('works')
@@ -67,7 +67,7 @@ class GameMovement:
         return self.direction
 
 
-class North(GameMovement):
+class Move(GameMovement):
     def __init__(self):
         self.direction = 'north'
         print(Character.room)
@@ -82,7 +82,10 @@ class North(GameMovement):
         self._desc = value
 
     def check_availability(self, direction):
-        directions = room.directions
+        room1 = self.room_list[Character.room]
+        if room1 == 'startingroom':
+            room1 = startingroom
+        directions = room1.directions
         if direction in directions:
             print('returning true')
             self.is_available = True
@@ -340,10 +343,10 @@ def examine(noun):
 
 
 def move(direction):
-    available = North.check_availability(north, direction)
+    available = Move.check_availability(moves, direction)
     if available is True:
         msg = 'You have moved {}'.format(direction)
-        Character.room += 1
+        Character.room += 0  # Change this when more room directions available
     elif available is False:
         msg = 'You cannot move in that direction.'
     else:
@@ -377,11 +380,10 @@ def get_monster():
     return msg
 
 
-startingroom_directions = ['north']
+startingroom_directions = ['south']
 character = Character('Geoffrey', 6, 0)
-room = StartingRoom(startingroom_directions)
-north = North()
-south = South()
+startingroom = StartingRoom(startingroom_directions)
+moves = Move()
 
 room_list = ['room', 'hallway']
 monster_list = ['minotaur', 'goblin']
