@@ -6,6 +6,7 @@ class GameRoom:
     desc = ''
     rooms = {}
     monster = ''
+    monster_msg = ''
     campfire_rooms = {}
     campfire = bool
 
@@ -16,7 +17,14 @@ class GameRoom:
         GameRoom.rooms[self.room_type] = self
 
     def get_desc(self):
-        return self.room_type + '\n' + self.desc + '\n' + self.monster
+        if type(self.monster) is Goblin:
+            self.monster = 'goblin'
+            self.monster_msg = 'There is a {} here'.format(self.monster)
+        elif type(self.monster) is Minotaur:
+            self.monster = 'minotaur'
+            self.monster_msg = 'There is a {} here'.format(self.monster)
+
+        return self.room_type + '\n' + self.desc + '\n' + self.monster_msg
 
 
 class StartingRoom(GameRoom):
@@ -30,10 +38,10 @@ class StartingRoom(GameRoom):
     @property
     def desc(self):
         if self.campfire is True:
-            campfire = 'There is a campfire in the room.'
+            campfire = 'There is a campfire here.'
+            return self._desc + '\n' + campfire
         else:
-            campfire = 'There is not a campfire in the room.'
-        return self._desc + '\n' + campfire
+            return self._desc
 
     @desc.setter
     def desc(self, value):
@@ -52,9 +60,30 @@ class Hallway1(GameRoom):
     def desc(self):
         if self.campfire is True:
             campfire = 'There is a campfire in the room.'
+            return self._desc + '\n' + campfire
         else:
-            campfire = 'There is not a campfire in the room.'
-        return self._desc + '\n' + campfire
+            return self._desc
+
+    @desc.setter
+    def desc(self, value):
+        self._desc = value
+
+
+class Room2(GameRoom):
+    def __init__(self, directions):
+        self.room_type = 'room'
+        self.desc = ''
+        self.campfire = False
+        self.directions = directions
+        super().__init__()
+
+    @property
+    def desc(self):
+        if self.campfire is True:
+            campfire = 'There is a campfire in the room.'
+            return self._desc + '\n' + campfire
+        else:
+            return self._desc
 
     @desc.setter
     def desc(self, value):
@@ -224,12 +253,11 @@ def start():
         
         There is a monster in the room.
                 
-        Your adventure begins here. Good luck
-    """)
+        Your adventure begins here. Good luck""")
 
 
 def get_input():
-    command = input(':').split()
+    command = input('\n:').split()
     verb_word = command[0]
     if verb_word in verb_dict:
         verb = verb_dict[verb_word]
@@ -325,13 +353,11 @@ def attack_back(noun):
 
 def examine(noun):
     if noun == 'room':
-        print(noun)
         current_room = GameObject.room_list[Character.room]
         if current_room == 'startingroom':
             current_room = startingroom
         elif current_room == 'hallway1':
             current_room = hallway1
-        print(current_room)
         return GameRoom.get_desc(current_room)
     elif noun in GameObject.objects:
         return GameObject.objects[noun].get_desc()
@@ -370,12 +396,11 @@ def loot(noun):
 def get_monster():
     randint = rand.randint(1, 2)
     if randint == 1:
-        msg = 'There is a Goblin in the room.'
         goblin = Goblin('Gobbly')
+        return goblin
     elif randint == 2:
-        msg = 'There is a Minotaur in the room.'
         minotaur = Minotaur('Taur Taur')
-    return msg
+        return minotaur
 
 
 startingroom_directions = ['north']
