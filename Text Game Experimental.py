@@ -72,7 +72,7 @@ class Hallway1(GameRoom):
 class Room2(GameRoom):
     def __init__(self, directions):
         self.room_type = 'room'
-        self.desc = ''
+        self.desc = 'A well lit circular room with doors east and west'
         self.campfire = False
         self.directions = directions
         super().__init__()
@@ -93,10 +93,10 @@ class Room2(GameRoom):
 class GameMovement:
     direction = ''
     is_available = bool
-    room_list = ['startingroom', 'hallway1']
+    room_list = ['startingroom', 'hallway1', 'room2']
 
     def __init__(self):
-        print('works')
+        placeholder = 0  # do nothing
 
     def get_desc(self):
         return self.direction
@@ -105,7 +105,6 @@ class GameMovement:
 class Move(GameMovement):
     def __init__(self):
         self.direction = 'north'
-        print(Character.room)
         super().__init__()
 
     @property
@@ -122,13 +121,13 @@ class Move(GameMovement):
             room1 = startingroom
         elif room1 == 'hallway1':
             room1 = hallway1
+        elif room1 == 'room2':
+            room1 = room2
         directions = room1.directions
         if direction in directions:
-            print('returning true')
             self.is_available = True
             return True
         elif direction not in directions:
-            print('returning false')
             self.is_available = False
             return False
         else:
@@ -141,7 +140,7 @@ class GameObject:
     is_looted = bool
     objects = {}
     room = 0
-    room_list = ['startingroom', 'hallway1']
+    room_list = ['startingroom', 'hallway1', 'room2']
 
     def __init__(self, name):
         self.name = name
@@ -159,6 +158,10 @@ class Goblin(GameObject):
         self.is_looted = False
         self.is_dead = False
         super().__init__(name)
+
+    def __delete__(self, instance):
+        print('deleting')
+        del self
 
     @property
     def desc(self):
@@ -185,6 +188,10 @@ class Minotaur(GameObject):
         self.is_looted = False
         self.is_dead = False
         super().__init__(name)
+
+    def __delete__(self, instance):
+        print('deleting')
+        del self
 
     @property
     def desc(self):
@@ -315,6 +322,7 @@ def hit(noun):
             if thing.health <= 0:
                 msg = 'You killed the {}'.format(thing.class_name)
                 thing.is_dead = True
+                del thing
             else:
                 msg = 'You hit the {}'.format(thing.class_name)
                 msg = msg + '\n' + attack_back(noun)
@@ -324,6 +332,7 @@ def hit(noun):
             if thing.health <= 0:
                 msg = 'You killed the {}'.format(thing.class_name)
                 thing.is_dead = True
+                del thing
             else:
                 msg = 'You hit the {}'.format(thing.class_name)
                 msg = msg + '\n' + attack_back(noun)
@@ -358,6 +367,8 @@ def examine(noun):
             current_room = startingroom
         elif current_room == 'hallway1':
             current_room = hallway1
+        elif current_room == 'room2':
+            current_room = room2
         return GameRoom.get_desc(current_room)
     elif noun in GameObject.objects:
         return GameObject.objects[noun].get_desc()
@@ -371,6 +382,7 @@ def move(direction):
     if available is True:
         msg = 'You have moved {} and entered a new room'.format(direction)
         Character.room += 1
+        del GameRoom.monster
     elif available is False:
         msg = 'You cannot move in that direction.'
     else:
@@ -403,14 +415,19 @@ def get_monster():
         return minotaur
 
 
+character = Character('Geoffrey', 6, 0)
+
 startingroom_directions = ['north']
 hallway1_directions = ['north']
-character = Character('Geoffrey', 6, 0)
+room2_directions = ['east', 'west']
+
 startingroom = StartingRoom(startingroom_directions)
 hallway1 = Hallway1(hallway1_directions)
+room2 = Room2(room2_directions)
+
 moves = Move()
 
-room_list = ['startingroom', 'hallway1']
+room_list = ['startingroom', 'hallway1', 'room2']
 monster_list = ['minotaur', 'goblin']
 direction_list = ['east', 'west', 'north', 'south']
 verb_arg_list = ['say', 'examine', 'hit', 'rest', 'move', 'loot']
