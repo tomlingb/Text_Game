@@ -26,6 +26,18 @@ class GameRoom:
 
         return self.room_type + '\n' + self.desc + '\n' + self.monster_msg
 
+    def del_monster(self, monster):
+        if hasattr(Goblin, 'goblin'):
+            print('deleting goblin')
+        else:
+            print('there is no goblin here')
+        if monster == 'minotaur':
+            if type(self.monster) is Minotaur:
+                print('deleting minotaur')
+                del self.monster
+            else:
+                print('there is no minotaur here')
+
 
 class StartingRoom(GameRoom):
     def __init__(self, directions):
@@ -382,7 +394,8 @@ def move(direction):
     if available is True:
         msg = 'You have moved {} and entered a new room'.format(direction)
         Character.room += 1
-        del GameRoom.monster
+        GameRoom.del_monster(GameRoom, 'goblin')
+        GameRoom.del_monster(GameRoom, 'minotaur')
     elif available is False:
         msg = 'You cannot move in that direction.'
     else:
@@ -406,13 +419,23 @@ def loot(noun):
 
 
 def get_monster():
+    count = 0
     randint = rand.randint(1, 2)
-    if randint == 1:
+    if randint == 1 and count == 0:
         goblin = Goblin('Gobbly')
+        print(Goblin.__instancecheck__(goblin))
+        count += 1
         return goblin
-    elif randint == 2:
+    elif randint == 2 and count == 1:
         minotaur = Minotaur('Taur Taur')
+        count -= 1
         return minotaur
+    else:
+        print('something went wrong')
+
+
+def get_rand_int():
+    rint = rand.randint(1, 2)
 
 
 character = Character('Geoffrey', 6, 0)
