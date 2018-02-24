@@ -11,7 +11,7 @@ class GameRoom:
     campfire = bool
 
     def __init__(self):
-        self.monster = get_monster()
+        self.monster = self.get_monsters()
         if self.campfire is True:
             GameRoom.campfire_rooms[self.room_type] = self
         GameRoom.rooms[self.room_type] = self
@@ -37,6 +37,13 @@ class GameRoom:
                 del self.monster
             else:
                 print('there is no minotaur here')
+
+    def get_monsters(self):
+        names = []
+        name = get_random_name()
+        names.append(name)
+        print(names)
+        return names[0]
 
 
 class StartingRoom(GameRoom):
@@ -191,6 +198,9 @@ class Goblin(GameObject):
     def desc(self, value):
         self._desc = value
 
+    def health_reset(self):
+        self.health = 3
+
 
 class Minotaur(GameObject):
     def __init__(self, name):
@@ -218,6 +228,9 @@ class Minotaur(GameObject):
     @desc.setter
     def desc(self, value):
         self._desc = value
+
+    def health_reset(self):
+        self.health = 3
 
 
 class Character(GameObject):
@@ -256,6 +269,7 @@ class Character(GameObject):
 
 def main():
     start()
+    get_monsters()
     while True:
         if get_input() is False:
             break
@@ -394,8 +408,6 @@ def move(direction):
     if available is True:
         msg = 'You have moved {} and entered a new room'.format(direction)
         Character.room += 1
-        GameRoom.del_monster(GameRoom, 'goblin')
-        GameRoom.del_monster(GameRoom, 'minotaur')
     elif available is False:
         msg = 'You cannot move in that direction.'
     else:
@@ -418,24 +430,21 @@ def loot(noun):
         return 'There is no {} to loot.'.format(noun)
 
 
-def get_monster():
-    count = 0
-    randint = rand.randint(1, 2)
-    if randint == 1 and count == 0:
-        goblin = Goblin('Gobbly')
-        print(Goblin.__instancecheck__(goblin))
-        count += 1
-        return goblin
-    elif randint == 2 and count == 1:
-        minotaur = Minotaur('Taur Taur')
-        count -= 1
-        return minotaur
-    else:
-        print('something went wrong')
+def get_random_name():
+    alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+                'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+                'x', 'y', 'z']
+    length = rand.randint(7, 10)
+    name = ''
+    for k in range(length):
+        letter = rand.randint(0, 25)
+        name += alphabet[letter]
+    return name
 
 
 def get_rand_int():
     rint = rand.randint(1, 2)
+    return rint
 
 
 character = Character('Geoffrey', 6, 0)
