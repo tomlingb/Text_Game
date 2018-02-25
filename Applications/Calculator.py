@@ -1,53 +1,109 @@
-def divide_by_0():
-    print('Division by 0 is invalid')
-    num2 = float(input('Please enter a new number:'))
-    if num2 == 0:
-        num2 = divide_by_0()
-    return num2
-
-
-def calculator():
+def main():
     while True:
-        user_input = str(input('Input function here:'))
+        get_input()
 
-        value = 0
 
-        if user_input == 'add':
-            num1 = float(input('Enter first number:'))
-            num2 = float(input('Enter second number:'))
-            value += num1 + num2
+def get_input():
+    command = input(':').split()
+    attempt2(command)
 
-            print('\n The answer is:', value, '\n')
 
-        elif user_input == 'subtract':
-            num1 = float(input('Enter first number:'))
-            num2 = float(input('Enter second number:'))
-            value += num1 - num2
+def order_of_operations(command):
+    value = 0
+    op_number = 0
+    op_happened = False
+    for k in range(len(command)):
+        if command[k] == '^' and op_happened is False:
+            first = command[k - 1]
+            second = command[k + 1]
+            value += power(first, second)
+            op_happened = True
+    for k in range(len(command)):
+        if command[k] == '*':
+            first = command[k - 1]
+            second = command[k + 1]
+            value += multiply(first, second)
+    for k in range(len(command)):
+        if command[k] == '/':
+            if op_happened is False:
+                first = command[k - 1]
+                second = command[k + 1]
+                value += divide(first, second)
+                op_happened = True
+            else:
+                second = command[k + 1]
+                value = divide(value, second)
+    for k in range(len(command)):
+        if command[k] == '+':
+            if op_happened is False:
+                first = command[k - 1]
+                second = command[k + 1]
+                value += add(first, second)
+                op_happened = True
+            else:
+                second = command[k + 1]
+                value = add(value, second)
+    for k in range(len(command)):
+        if command[k] == '-':
+            if op_happened is False:
+                first = command[k - 1]
+                second = command[k + 1]
+                value += subtract(first, second)
+                op_happened = True
+            else:
+                second = command[k + 1]
+                value = subtract(value, second)
+    print(value)
 
-            print('\n The answer is:', value, '\n')
 
-        elif user_input == 'multiply':
-            num1 = float(input('Enter first number:'))
-            num2 = float(input('Enter second number:'))
-            value += num1 * num2
-
-            print('\n The answer is:', value, '\n')
-
-        elif user_input == 'divide':
-            num1 = float(input('Enter first number:'))
-            num2 = float(input('Enter second number:'))
-            if num2 == 0:
-                num2 = divide_by_0()
-            value += num1 / num2
-
-            print('\n The answer is:', value, '\n')
-
-        elif user_input == 'quit':
+def attempt2(command):
+    value = 0
+    finished = False
+    while finished is False:
+        mult_count = 0
+        for k in range(len(command)):
+            if command[k] == '*':
+                mult_count += 1
+        print(command)
+        if mult_count > 0:
+            mult_complete = False
+            while mult_complete is False:
+                for k in range(len(command)):
+                    if command[k] == '*':
+                        value = multiply(command[k - 1], command[k + 1])
+                        index = k
+                        mult_complete = True
+            command.remove(command[index + 1])
+            command[index] = value
+            command.remove(command[index - 1])
+        if len(command) == 1:
+            print(command)
             break
 
-        else:
-            print('\n Invalid Input\n')
-            continue
+
+def add(first, second):
+    value = float(first) + float(second)
+    return value
 
 
-calculator()
+def subtract(first, second):
+    value = float(first) - float(second)
+    return value
+
+
+def multiply(first, second):
+    value = float(first) * float(second)
+    return value
+
+
+def divide(first, second):
+    value = float(first) / float(second)
+    return value
+
+
+def power(first, second):
+    value = float(first) ** float(second)
+    return value
+
+
+main()
