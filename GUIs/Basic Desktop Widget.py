@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import tkinter
 from tkinter import ttk
-import Applications.Calculator_GUI as calc
+import Applications.Calculator as calc
 
 
 def main():
@@ -15,9 +15,11 @@ def main():
     calculator_button.grid(row=0, column=1)
     calculator_button['command'] = lambda: open_calculator()
 
+    root.mainloop()
+
 
 def open_calculator():
-    exec(str(calc))
+    calc.main()
 
 
 main()
