@@ -32,6 +32,7 @@ def print_file():
     my_file = file()
     print(my_file.read())
     my_file.close()
+    print()
 
 
 def character_in_file():
